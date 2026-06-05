@@ -1,0 +1,12 @@
+# Binarios compilados
+valkiria
+valkiria.exe
+*.exe
+
+# Archivos de entorno y secretos
+.env
+*.env
+
+# Directorios de IDEs (opcional pero recomendado)
+.vscode/
+.idea/
