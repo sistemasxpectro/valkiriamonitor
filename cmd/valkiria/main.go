@@ -10,6 +10,7 @@ import (
 	"github.com/joho/godotenv"
 	"valkiria-monitor/internal/metrics"
 	"valkiria-monitor/internal/notifier"
+	"valkiria-monitor/internal/server"
 )
 
 func main() {
@@ -50,6 +51,9 @@ func main() {
 			evaluateMetrics(discordWebhook, telegramService)
 		}
 	}()
+
+	// Lanza la API interna para webhook local de PM2
+	server.StartInternalAPI(telegramService, discordWebhook)
 
 	// Bloquea el hilo principal ejecutando la escucha reactiva de comandos de Telegram
 	telegramService.StartListening()

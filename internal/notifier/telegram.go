@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"valkiria-monitor/internal/commands"
 	"valkiria-monitor/internal/metrics"
 )
 
@@ -51,6 +52,14 @@ func (s *TelegramService) SendCriticalAlert(message string) error {
 	return nil
 }
 
+func (s *TelegramService) reply(chatID int64, text string) {
+	msg := tgbotapi.NewMessage(chatID, text)
+	msg.ParseMode = "MarkdownV2"
+	if _, err := s.bot.Send(msg); err != nil {
+		log.Printf("Error enviando respuesta: %v", err)
+	}
+}
+
 func (s *TelegramService) StartListening() {
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 60
@@ -58,21 +67,25 @@ func (s *TelegramService) StartListening() {
 	updates := s.bot.GetUpdatesChan(u)
 
 	for update := range updates {
-		if update.Message == nil {
+		if update.Message == nil || !update.Message.IsCommand() {
 			continue
 		}
 
-		if !update.Message.IsCommand() {
+		// [SEGURIDAD] Ignorar cualquier mensaje que no venga del Administrador
+		if update.Message.Chat.ID != s.adminChatID {
+			log.Printf("[Seguridad] Intento de acceso denegado del ChatID: %d", update.Message.Chat.ID)
 			continue
 		}
 
-		switch update.Message.Command() {
+		command := update.Message.Command()
+		chatID := update.Message.Chat.ID
+
+		switch command {
 		case "statusvps":
 			stats, err := metrics.GetStats()
 			if err != nil {
 				log.Printf("Error obteniendo métricas: %v", err)
-				msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Error obteniendo métricas del sistema.")
-				s.bot.Send(msg)
+				s.reply(chatID, s.EscapeMD2("Error obteniendo métricas del sistema."))
 				continue
 			}
 
@@ -87,12 +100,31 @@ func (s *TelegramService) StartListening() {
 				s.EscapeMD2(fmt.Sprintf("%.2f%% (%d GB / %d GB)", stats.DiskUsage, stats.DiskUsed/(1024*1024*1024), stats.DiskTotal/(1024*1024*1024))),
 				s.EscapeMD2(fmt.Sprintf("%.2f horas", stats.UptimeHours)),
 			)
+			s.reply(chatID, text)
 
-			msg := tgbotapi.NewMessage(update.Message.Chat.ID, text)
-			msg.ParseMode = "MarkdownV2"
-			if _, err := s.bot.Send(msg); err != nil {
-				log.Printf("Error enviando respuesta de statusvps: %v", err)
+		case "pm2status":
+			statusMsg, err := commands.GetPM2Status()
+			if err != nil {
+				log.Printf("[PM2] Error: %v", err)
+				s.reply(chatID, s.EscapeMD2("Error consultando PM2. Revisa los logs."))
+				continue
 			}
+			s.reply(chatID, s.EscapeMD2("📊 *Estado de PM2:*\n\n")+s.EscapeMD2(statusMsg))
+
+		case "pm2restart":
+			args := update.Message.CommandArguments()
+			if args == "" {
+				s.reply(chatID, s.EscapeMD2("⚠️ Debes especificar el nombre de la app o 'all'. Ejemplo: /pm2restart api"))
+				continue
+			}
+			
+			resultMsg, err := commands.RestartPM2App(args)
+			if err != nil {
+				log.Printf("[PM2] Error reiniciando: %v", err)
+				s.reply(chatID, s.EscapeMD2(fmt.Sprintf("❌ Error al reiniciar '%s'.", args)))
+				continue
+			}
+			s.reply(chatID, s.EscapeMD2(resultMsg))
 		}
 	}
 }
