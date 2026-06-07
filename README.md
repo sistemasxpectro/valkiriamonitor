@@ -33,6 +33,8 @@ INTERNAL_API_TOKEN=tu_token_secreto_aqui
 SERVER_NAME=TU_SERVIDOR
 ```
 
+*Nota: La variable `SERVER_NAME` es opcional pero muy útil si tienes múltiples servidores conectados al mismo grupo de Telegram. Permite identificar de qué servidor provienen las alertas (ej. "Estado del TIQUEO" en lugar de "Estado del VPS").*
+
 ### 3. Compilación y Ejecución Manual
 Para descargar las dependencias y compilar el proyecto:
 
