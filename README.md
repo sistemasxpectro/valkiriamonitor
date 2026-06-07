@@ -9,6 +9,8 @@ Además, permite consultar el estado del servidor a demanda mediante un bot de T
 - 📊 **Métricas Precisas:** Monitoriza RAM, CPU, Disco y Uptime mediante `gopsutil`.
 - 🚨 **Alertas Proactivas:** Envía alertas automáticas cuando los recursos superan umbrales críticos (por defecto: RAM > 85%).
 - 💬 **Bot Interactivo (Telegram):** Responde al comando `/statusvps` con un resumen detallado y amigable (soporta emojis y MarkdownV2).
+- 🔄 **Integración con PM2:** Consulta el estado de las aplicaciones con `/pm2status`, reinícialas remotamente con `/pm2restart`, y recibe alertas instantáneas en Telegram si una aplicación Node.js se cae inesperadamente.
+- 🛡️ **Seguridad Estricta:** Comandos administrativos restringidos exclusivamente a tu ID de Telegram y webhooks protegidos por token local.
 - ⚡ **Ultra Ligero:** Escrito en Go, compilado estáticamente. Prácticamente no consume recursos en segundo plano.
 
 ---
@@ -27,6 +29,7 @@ Clona este repositorio o copia los archivos. Luego, en la raíz del proyecto, cr
 TELEGRAM_BOT_TOKEN=tu_token_aqui
 TELEGRAM_ADMIN_CHAT_ID=tu_chat_id_numerico
 DISCORD_WEBHOOK_URL=tu_webhook_aqui
+INTERNAL_API_TOKEN=tu_token_secreto_aqui
 ```
 
 ### 3. Compilación y Ejecución Manual
@@ -96,9 +99,25 @@ La mejor manera de ejecutar Valkiria Monitor en un servidor en producción es ut
 ## 🤖 Uso
 Una vez que la aplicación esté corriendo, simplemente ve al chat de tu bot en Telegram y envía:
 
-`/statusvps`
+- `/statusvps`: El bot responderá instantáneamente con el uso de CPU, RAM, Disco y el tiempo que lleva encendido el servidor.
+- `/pm2status`: Obtiene la lista de aplicaciones gestionadas por PM2, su uso de CPU, memoria y si están online/offline.
+- `/pm2restart <app_name|all>`: Reinicia una o todas las aplicaciones en PM2 remotamente.
 
-El bot responderá instantáneamente con el uso de CPU, RAM, Disco y el tiempo que lleva encendido el servidor.
+*(Nota: Cualquier comando enviado por un usuario que no sea el `TELEGRAM_ADMIN_CHAT_ID` será ignorado por seguridad).*
+
+---
+
+## 🌉 Puente PM2 (Alertas Reactivas)
+Si deseas recibir alertas inmediatas cuando una aplicación de Node gestionada por PM2 haga "crash", debes arrancar el script puente incluido en la carpeta `scripts/`.
+
+En tu servidor, donde esté alojado Valkiria Monitor:
+1. Copia el archivo `scripts/pm2-listener.js`.
+2. Ejecútalo pasándole el token interno que configuraste en tu `.env`:
+```bash
+INTERNAL_API_TOKEN=tu_token_secreto_aqui pm2 start pm2-listener.js --name "valkiria-pm2-bridge" --max-memory-restart 50M
+pm2 save
+```
+Este script consumirá menos de 35 MB de RAM y actuará como puente silencioso notificando caídas de forma segura.
 
 ---
 
