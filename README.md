@@ -94,6 +94,20 @@ La mejor manera de ejecutar Valkiria Monitor en un servidor en producción es ut
    sudo journalctl -u valkiria -f
    ```
 
+5. **Actualizar y Reiniciar el servicio:**
+   Si subes una nueva versión del código a tu servidor o modificas el archivo `.env`, debes recompilar el binario y reiniciar el servicio:
+   ```bash
+   # Recompilar y reemplazar el binario
+   go build -o valkiria cmd/valkiria/main.go
+   sudo mv valkiria /opt/valkiria-monitor/
+   
+   # Reiniciar el servicio
+   sudo systemctl restart valkiria
+   
+   # (Opcional) Verificar que arrancó bien
+   sudo systemctl status valkiria
+   ```
+
 ---
 
 ## 🤖 Uso
