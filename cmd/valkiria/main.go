@@ -22,6 +22,10 @@ func main() {
 	telegramToken := os.Getenv("TELEGRAM_BOT_TOKEN")
 	telegramAdminIDStr := os.Getenv("TELEGRAM_ADMIN_CHAT_ID")
 	discordWebhook := os.Getenv("DISCORD_WEBHOOK_URL")
+	serverName := os.Getenv("SERVER_NAME")
+	if serverName == "" {
+		serverName = "VPS"
+	}
 
 	if telegramToken == "" || telegramAdminIDStr == "" || discordWebhook == "" {
 		log.Fatal("Faltan variables de entorno requeridas: TELEGRAM_BOT_TOKEN, TELEGRAM_ADMIN_CHAT_ID, DISCORD_WEBHOOK_URL")
@@ -32,7 +36,7 @@ func main() {
 		log.Fatalf("El ID del administrador de Telegram no es válido: %v", err)
 	}
 
-	telegramService, err := notifier.NewTelegramService(telegramToken, telegramAdminID)
+	telegramService, err := notifier.NewTelegramService(telegramToken, telegramAdminID, serverName)
 	if err != nil {
 		log.Fatalf("No se pudo inicializar el servicio de Telegram: %v", err)
 	}
@@ -42,24 +46,24 @@ func main() {
 	// Lanza una goroutine que se ejecute cada 5 minutos evaluando las métricas
 	go func() {
 		// Evaluamos inmediatamente al arrancar
-		evaluateMetrics(discordWebhook, telegramService)
+		evaluateMetrics(discordWebhook, telegramService, serverName)
 
 		ticker := time.NewTicker(5 * time.Minute)
 		defer ticker.Stop()
 
 		for range ticker.C {
-			evaluateMetrics(discordWebhook, telegramService)
+			evaluateMetrics(discordWebhook, telegramService, serverName)
 		}
 	}()
 
 	// Lanza la API interna para webhook local de PM2
-	server.StartInternalAPI(telegramService, discordWebhook)
+	server.StartInternalAPI(telegramService, discordWebhook, serverName)
 
 	// Bloquea el hilo principal ejecutando la escucha reactiva de comandos de Telegram
 	telegramService.StartListening()
 }
 
-func evaluateMetrics(discordWebhook string, telegramService *notifier.TelegramService) {
+func evaluateMetrics(discordWebhook string, telegramService *notifier.TelegramService, serverName string) {
 	stats, err := metrics.GetStats()
 	if err != nil {
 		log.Printf("Error obteniendo métricas en el proceso de fondo: %v", err)
@@ -70,7 +74,7 @@ func evaluateMetrics(discordWebhook string, telegramService *notifier.TelegramSe
 	// stats.DiskUsage > 90.0 || (Comentado temporalmente)
 	if stats.RAMUsage > 85.0 {
 		alertMsg := fmt.Sprintf(
-			"🚨 *ALERTA DE SISTEMA* 🚨\n\n"+
+			"🚨 *ALERTA DE SISTEMA (%s)* 🚨\n\n"+
 				"🧠 *RAM:* %.2f%% (Uso Elevado)\n"+
 				"⚙️ *CPU:* %.2f%%\n"+
 				"💽 *Disco:* %.2f%%\n\n"+

@@ -16,7 +16,7 @@ type CrashPayload struct {
 	Error string `json:"error"`
 }
 
-func StartInternalAPI(tg *notifier.TelegramService, discordURL string) {
+func StartInternalAPI(tg *notifier.TelegramService, discordURL string, serverName string) {
 	internalToken := os.Getenv("INTERNAL_API_TOKEN")
 	if internalToken == "" {
 		log.Println("[Advertencia] INTERNAL_API_TOKEN no configurado. La API interna no validará solicitudes.")
@@ -44,8 +44,8 @@ func StartInternalAPI(tg *notifier.TelegramService, discordURL string) {
 		}
 
 		// Formateamos el mensaje para Telegram
-		rawMsg := fmt.Sprintf("⚠️ *PM2 CRASH DETECTADO*\n\n*App:* %s\n*Evento:* %s\n*Detalle:* %s", 
-			payload.App, payload.Event, payload.Error)
+		rawMsg := fmt.Sprintf("⚠️ *PM2 CRASH DETECTADO (%s)*\n\n*App:* %s\n*Evento:* %s\n*Detalle:* %s", 
+			serverName, payload.App, payload.Event, payload.Error)
 
 		// Disparamos notificaciones reactivas
 		tg.SendCriticalAlert(rawMsg)

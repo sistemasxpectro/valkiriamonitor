@@ -30,6 +30,7 @@ TELEGRAM_BOT_TOKEN=tu_token_aqui
 TELEGRAM_ADMIN_CHAT_ID=tu_chat_id_numerico
 DISCORD_WEBHOOK_URL=tu_webhook_aqui
 INTERNAL_API_TOKEN=tu_token_secreto_aqui
+SERVER_NAME=TU_SERVIDOR
 ```
 
 ### 3. Compilación y Ejecución Manual

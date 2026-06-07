@@ -13,9 +13,10 @@ import (
 type TelegramService struct {
 	bot         *tgbotapi.BotAPI
 	adminChatID int64
+	serverName  string
 }
 
-func NewTelegramService(token string, adminChatID int64) (*TelegramService, error) {
+func NewTelegramService(token string, adminChatID int64, serverName string) (*TelegramService, error) {
 	bot, err := tgbotapi.NewBotAPI(token)
 	if err != nil {
 		return nil, fmt.Errorf("error iniciando bot de telegram: %w", err)
@@ -23,6 +24,7 @@ func NewTelegramService(token string, adminChatID int64) (*TelegramService, erro
 	return &TelegramService{
 		bot:         bot,
 		adminChatID: adminChatID,
+		serverName:  serverName,
 	}, nil
 }
 
@@ -90,11 +92,12 @@ func (s *TelegramService) StartListening() {
 			}
 
 			text := fmt.Sprintf(
-				"🖥 *Estado del VPS*\n\n"+
+				"🖥 *Estado del %s*\n\n"+
 					"⚙️ *CPU:* %s\n"+
 					"🧠 *RAM:* %s\n"+
 					"💽 *Disco:* %s\n"+
 					"⏱ *Uptime:* %s",
+				s.EscapeMD2(s.serverName),
 				s.EscapeMD2(fmt.Sprintf("%.2f%%", stats.CPUUsage)),
 				s.EscapeMD2(fmt.Sprintf("%.2f%% (%d MB / %d MB)", stats.RAMUsage, stats.RAMUsed/(1024*1024), stats.RAMTotal/(1024*1024))),
 				s.EscapeMD2(fmt.Sprintf("%.2f%% (%d GB / %d GB)", stats.DiskUsage, stats.DiskUsed/(1024*1024*1024), stats.DiskTotal/(1024*1024*1024))),
