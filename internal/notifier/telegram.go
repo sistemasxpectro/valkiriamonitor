@@ -92,7 +92,7 @@ func (s *TelegramService) StartListening() {
 			}
 
 			text := fmt.Sprintf(
-				"🖥 *Estado del %s*\n\n"+
+				"🖥 *Estado del Servidor: %s*\n\n"+
 					"⚙️ *CPU:* %s\n"+
 					"🧠 *RAM:* %s\n"+
 					"💽 *Disco:* %s\n"+

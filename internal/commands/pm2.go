@@ -38,7 +38,7 @@ func GetPM2Status() (string, error) {
 	}
 
 	if len(processes) == 0 {
-		return "No hay procesos en PM2\\.", nil
+		return "No hay procesos en PM2.", nil
 	}
 
 	// Formateamos la salida para Telegram (MarkdownV2)
@@ -52,7 +52,7 @@ func GetPM2Status() (string, error) {
 		memMB := float64(p.Monit.Memory) / 1024 / 1024
 		
 		// OJO: Los caracteres especiales se escaparán luego en la función general de Telegram
-		result += fmt.Sprintf("%s *%s*\nEstado: %s\nCPU: %.1f%%\nRAM: %.1f MB\n\n",
+		result += fmt.Sprintf("%s %s\nEstado: %s\nCPU: %.1f%%\nRAM: %.1f MB\n\n",
 			statusEmoji, p.Name, p.PM2Env.Status, p.Monit.CPU, memMB)
 	}
 
@@ -69,5 +69,5 @@ func RestartPM2App(appName string) (string, error) {
 	if err := cmd.Run(); err != nil {
 		return "", fmt.Errorf("fallo al reiniciar '%s': %w", appName, err)
 	}
-	return fmt.Sprintf("✅ Proceso '%s' reiniciado correctamente\\.", appName), nil
+	return fmt.Sprintf("✅ Proceso '%s' reiniciado correctamente.", appName), nil
 }
