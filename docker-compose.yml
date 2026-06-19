@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  valkiria-monitor:
+    build: .
+    container_name: valkiria-monitor
+    restart: unless-stopped
+    # Montamos los directorios del host como solo lectura para que gopsutil 
+    # pueda leer las métricas reales del servidor anfitrión.
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    environment:
+      # Definimos las variables para que gopsutil lea desde los volúmenes montados
+      - HOST_PROC=/host/proc
+      - HOST_SYS=/host/sys
+      - HOST_ETC=/host/etc
+      
+      # Variables de entorno cargadas desde un archivo .env si se prefiere
+      # O definidas directamente aquí (se recomienda usar env_file)
+      # - TELEGRAM_BOT_TOKEN=
+      # - TELEGRAM_ADMIN_CHAT_ID=
+      # - DISCORD_WEBHOOK_URL=
+      # - INTERNAL_API_TOKEN=
+      # - SERVER_NAME=
+    env_file:
+      - .env
+    # Mapeamos el puerto 8451 para recibir los webhooks locales (si se envía desde el host)
+    ports:
+      - "8451:8451"

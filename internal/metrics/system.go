@@ -2,6 +2,7 @@ package metrics
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/shirou/gopsutil/v3/cpu"
 	"github.com/shirou/gopsutil/v3/disk"
@@ -41,11 +42,16 @@ func GetStats() (*SystemStats, error) {
 	stats.RAMTotal = vMem.Total
 	stats.RAMUsage = vMem.UsedPercent
 
-	// Disco (partición raíz /)
-	dUsage, err := disk.Usage("/")
+	rootPath := os.Getenv("HOST_ROOTFS")
+	if rootPath == "" {
+		rootPath = "/"
+	}
+
+	// Disco (partición raíz)
+	dUsage, err := disk.Usage(rootPath)
 	if err != nil {
 		// Retornamos error con wrap
-		return nil, fmt.Errorf("error obteniendo uso de disco: %w", err)
+		return nil, fmt.Errorf("error obteniendo uso de disco en %s: %w", rootPath, err)
 	}
 	stats.DiskUsed = dUsage.Used
 	stats.DiskTotal = dUsage.Total
