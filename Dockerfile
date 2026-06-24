@@ -13,6 +13,9 @@ RUN go mod download
 # Copiar el resto del código fuente
 COPY . .
 
+# Asegurar que las dependencias (go.sum) estén actualizadas
+RUN go mod tidy
+
 # Compilar el binario
 RUN go build -o valkiria-monitor ./cmd/valkiria
 
