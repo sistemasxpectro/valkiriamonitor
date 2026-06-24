@@ -121,14 +121,14 @@ Si prefieres mantener tu servidor limpio y utilizar contenedores, puedes despleg
 2. **Clona el repositorio** y crea el archivo `.env` como se indica en el paso anterior.
 3. **Inicia el contenedor en segundo plano:**
    ```bash
-   docker-compose up -d --build
+   docker compose up -d --build
    ```
 
 Con esto, el servicio quedará corriendo, se reiniciará automáticamente si el servidor se apaga (`restart: unless-stopped`) y tendrá acceso de solo lectura a `/proc` y `/sys` del host para brindar métricas exactas.
 
 Para ver los logs del contenedor:
 ```bash
-docker-compose logs -f valkiria-monitor
+docker compose logs -f valkiria-monitor
 ```
 
 ---
