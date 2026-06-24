@@ -128,6 +128,33 @@ func (s *TelegramService) StartListening() {
 				continue
 			}
 			s.reply(chatID, s.EscapeMD2(resultMsg))
+
+		case "dockerstatus":
+			statusMsg, err := commands.GetDockerStatus()
+			if err != nil {
+				log.Printf("[Docker] Error: %v", err)
+				s.reply(chatID, s.EscapeMD2("Error consultando Docker. Asegúrate de tener configurado /var/run/docker.sock en los volúmenes."))
+				continue
+			}
+			s.reply(chatID, s.EscapeMD2("🐳 *Estado de Docker:*\n\n")+s.EscapeMD2(statusMsg))
+
+		case "dockerrestart", "dockerstop", "dockerstart":
+			args := strings.TrimSpace(update.Message.CommandArguments())
+			if args == "" {
+				s.reply(chatID, s.EscapeMD2(fmt.Sprintf("⚠️ Debes especificar el nombre del contenedor. Ejemplo: /%s nginx", command)))
+				continue
+			}
+
+			// Extraer la acción del comando (ej. dockerrestart -> restart)
+			action := strings.TrimPrefix(command, "docker")
+			
+			resultMsg, err := commands.ManageDockerContainer(action, args)
+			if err != nil {
+				log.Printf("[Docker] Error en %s: %v", command, err)
+				s.reply(chatID, s.EscapeMD2(fmt.Sprintf("❌ Error al intentar aplicar '%s' al contenedor '%s'.", action, args)))
+				continue
+			}
+			s.reply(chatID, s.EscapeMD2(resultMsg))
 		}
 	}
 }

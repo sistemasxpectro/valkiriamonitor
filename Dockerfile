@@ -24,8 +24,8 @@ FROM alpine:latest
 
 WORKDIR /app
 
-# Instalar certificados CA para las peticiones HTTPS a las APIs
-RUN apk add --no-cache ca-certificates tzdata
+# Instalar certificados CA para las peticiones HTTPS a las APIs, y docker-cli para gestionar contenedores
+RUN apk add --no-cache ca-certificates tzdata docker-cli
 
 # Copiar el binario compilado desde la etapa builder
 COPY --from=builder /app/valkiria-monitor .

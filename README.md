@@ -139,6 +139,10 @@ Una vez que la aplicación esté corriendo, simplemente ve al chat de tu bot en 
 - `/statusvps`: El bot responderá instantáneamente con el uso de CPU, RAM, Disco y el tiempo que lleva encendido el servidor.
 - `/pm2status`: Obtiene la lista de aplicaciones gestionadas por PM2, su uso de CPU, memoria y si están online/offline.
 - `/pm2restart <app_name|all>`: Reinicia una o todas las aplicaciones en PM2 remotamente.
+- `/dockerstatus`: Obtiene la lista de contenedores Docker en el host y sus estados.
+- `/dockerstart <container_name>`: Inicia un contenedor Docker.
+- `/dockerstop <container_name>`: Detiene un contenedor Docker.
+- `/dockerrestart <container_name>`: Reinicia un contenedor Docker.
 
 *(Nota: Cualquier comando enviado por un usuario que no sea el `TELEGRAM_ADMIN_CHAT_ID` será ignorado por seguridad).*
 

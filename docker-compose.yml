@@ -8,6 +8,7 @@ services:
     # Montamos los directorios del host como solo lectura para que gopsutil 
     # pueda leer las métricas reales del servidor anfitrión.
     volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
       - /proc:/host/proc:ro
       - /sys:/host/sys:ro
       - /:/rootfs:ro
